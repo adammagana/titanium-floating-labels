@@ -50,7 +50,7 @@ mainWindow.add(mainView);
 
 
 
-if (Ti.Platform.osname === 'ios') {
+if (Ti.Platform.osname === 'iphone') {
     var navWindow = Ti.UI.iOS.createNavigationWindow({
         window: mainWindow
     });
