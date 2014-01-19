@@ -1,38 +1,56 @@
+var defaults = {
+    borderColor: "#d6d6d6",
+    borderWidth: 0.5,
+    bottom: 0,
+    color: "#000000",
+    delay: 100,
+    duration: 200,
+    height: 41,
+    hintText: "Textfield",
+    hintTextColor: "#c4c4c4",
+    hintTextFocusColor: "#0000ff",
+    hintTextFont: {
+        fontSize: 10,
+        fontWeight: 'bold'
+    },
+    font: {
+        fontFamily: "HelveticaNeue-Light",
+        fontSize: 15
+    },
+    left: null,
+    right: null,
+    top: null,
+    width: Ti.UI.FILL
+};
+
+function pickOutExtraOptions(options) {
+    var extraOptions = {};
+
+    for (var option in options) {
+        if (defaults[option] === undefined) {
+            extraOptions[option] = options[option];
+        }
+    }
+
+    return extraOptions;
+}
+
+
+
 exports.createTextField = function () {
-    var options = arguments[0] || {},
-        defaults = {
-            borderColor: "#d6d6d6",
-            borderWidth: 0.5,
-            color: "#000000",
-            delay: 100,
-            duration: 300,
-            height: 18,
-            hintTextColor: "#c4c4c4",
-            hintTextFocusColor: "#0000ff",
-            hintTextFont: {
-                fontSize: 10,
-                fontWeight: 'bold'
-            },
-            font: {
-                fontFamily: "HelveticaNeue-Light",
-                fontSize: 15
-            },
-            width: Ti.UI.FILL
-        };
+    var options = arguments[0] || {};
 
 
 
     // Floating label animations
     var fadeIn = Ti.UI.createAnimation({
-        delay: defaults.delay,
-        duration: defaults.duration,
+        delay: defaults.delay || options.delay,
+        duration: defaults.duration || options.duration,
         opacity: 1.0
     });
-    var slideDown = Ti.UI.createAnimation({
-        duration: defaults.duration,
-        top: (options.hintTextFont && options.hintTextFont.fontSize) ?
-             (options.hintTextFont.fontSize + 4) :
-             (defaults.hintTextFont.fontSize + 4)
+    var fadeOut = Ti.UI.createAnimation({
+        duration: defaults.duration || options.duration,
+        opacity: 0.0
     });
 
     var transitionToFocusColor = Ti.UI.createAnimation({
@@ -44,22 +62,14 @@ exports.createTextField = function () {
         duration: defaults.duration
     });
 
-    // Text field animations
-    var fadeOut = Ti.UI.createAnimation({
-        duration: defaults.duration,
-        opacity: 0.0
-    });
-    var slideUp = Ti.UI.createAnimation({
-        delay: defaults.delay,
-        duration: defaults.duration,
-        top: 0
-    });
-
 
 
     // Make sure that a hintText key value was passed.
     if (options.hintText === undefined && typeof options.hintText === "string") {
-        throw "FloatingLabelFields module requires a 'hintText' key of type string to be passed.";
+        throw {
+            name: "Missing Required Argument",
+            message: "FloatingLabelFields module requires a `hintText` keyword argument of type string."
+        };
     }
 
 
@@ -68,39 +78,56 @@ exports.createTextField = function () {
     var container = Ti.UI.createView({
         borderColor: options.borderColor || defaults.borderColor,
         borderWidth: options.borderWidth || defaults.borderWidth,
-        height: Ti.UI.SIZE,
+        height: options.height || defaults.height,
+        layout: 'vertical',
         width: options.width || defaults.width
     });
 
-    // Only enforce positioning properties if they were passed as options
+    // Only enforce positioning properties on the container if they were passed as options
     if (options.left) {
         container.left = options.left;
+    }
+
+    if (options.right) {
+        container.right = options.right;
     }
 
     if (options.top) {
         container.top = options.top;
     }
 
+    if (options.bottom) {
+        container.bottom = options.bottom;
+    }
+
     var floatingLabel = Ti.UI.createLabel({
         color: options.hintTextColor || defaults.hintTextColor,
         font: options.hintTextFont || defaults.hintTextFont,
-        left: 5,
+        height: (options.hintTextFont && options.hintTextFont.fontSize) ? (options.hintTextFont.fontSize + 3) : (defaults.hintTextFont.fontSize + 3),
+        left: 7,
+        minimumFontSize: (options.hintTextFont && options.hintTextFont.fontSize) ? (options.hintTextFont.fontSize) : (defaults.hintTextFont.fontSize),
         opacity: 0,
         text: options.hintText,
         textAlign: 'left',
-        top: 3
+        top: 5
     });
     var textField = Ti.UI.createTextField({
         borderWidth: 0,
         font: options.font || defaults.font,
+        height: (options.font && options.font.fontSize) ? (options.font.fontSize + 3) : (defaults.font.fontSize + 3),
         hintText: options.hintText,
-        left: 5,
+        left: 7,
         top: 0
     });
     var padding = Ti.UI.createView({
         height: 5,
         width: Ti.UI.SIZE
     });
+
+
+
+    // Apply any ancillary options/properties to the textfield
+    textField.applyProperties(pickOutExtraOptions(options));
 
 
 
@@ -119,10 +146,8 @@ exports.createTextField = function () {
     textField.addEventListener('change', function (e) {
         if (e.value.length === 0) {
             floatingLabel.animate(fadeOut);
-            textField.animate(slideUp);
         } else {
             floatingLabel.animate(fadeIn);
-            textField.animate(slideDown);
         }
     });
 
