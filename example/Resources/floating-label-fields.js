@@ -8,7 +8,7 @@ var defaults = {
     height: 41,
     hintText: "Textfield",
     hintTextColor: "#c4c4c4",
-    hintTextFocusColor: "#0000ff",
+    hintTextFocusColor: "#426bf2",
     hintTextFont: {
         fontSize: 10,
         fontWeight: 'bold'
